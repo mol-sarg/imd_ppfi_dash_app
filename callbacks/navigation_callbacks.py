@@ -11,7 +11,7 @@ from app import app
     Output('mismatch_panel', 'style'),
     Output('about_panel', 'style'),
 
-    Output('geography_block', 'style'),  # 👈 NEW
+    Output('geography_block', 'style'),
 
     Output('dataset_block', 'style'),
     Output('domain_block', 'style'),
@@ -74,3 +74,4 @@ def switch_view(view, geo):
         hide, hide, hide,
         hide, hide
     )
+
