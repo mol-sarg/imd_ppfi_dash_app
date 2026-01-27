@@ -1,0 +1,24 @@
+# OS / editor
+.DS_Store
+.Rhistory
+.vscode/
+
+# python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# jupyter
+.ipynb_checkpoints/
+
+# data 
+data/
+*.csv
+*.geojson
+*.shp
+*.gpkg
+
+# environments
+.env
+venv/

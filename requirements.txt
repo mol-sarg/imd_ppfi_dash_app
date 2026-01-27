@@ -1,0 +1,10 @@
+dash
+plotly
+pandas
+numpy
+geopandas
+shapely
+pyproj
+fiona
+requests
+gunicorn
