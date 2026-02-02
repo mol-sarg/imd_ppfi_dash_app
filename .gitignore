@@ -12,13 +12,6 @@ __pycache__/
 # jupyter
 .ipynb_checkpoints/
 
-# data 
-data/
-*.csv
-*.geojson
-*.shp
-*.gpkg
-
 # environments
 .env
 venv/
