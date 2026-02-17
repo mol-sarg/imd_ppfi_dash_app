@@ -104,6 +104,7 @@ def make_map(
     *,
     compact_hover: bool = False,  
 ):
+
     pretty = _pretty_domain(domain)
     metric = "Decile" if geography == "lsoa" else "Rank"
 
@@ -134,7 +135,6 @@ def make_map(
 
     gdf["hover_name"] = _safe_series(gdf, name_col, "")
 
-    # selected-domain values for PPFI & IMD
     gdf["ppfi_val"] = _safe(gdf, dom_ppfi)
     gdf["imd_val"]  = _safe(gdf, dom_imd)
 
@@ -157,13 +157,11 @@ def make_map(
         lambda v: _alignment_band(v, geography, int(getattr(gdf_lad_full, "shape", [0])[0] or 0))
     )
 
-    # domain line ONLY when domain != "combined" 
     if domain != "combined" and color_col in gdf.columns:
         gdf["domain_line"] = f"{pretty} {metric} ({dataset.upper()}): " + gdf[color_col].astype(str)
     else:
         gdf["domain_line"] = ""
 
-    # customdata — keep full set; compact hover will pick only what it needs
     customdata = gdf[[
         "hover_name",      # 0
         "ppfi_val",        # 1
@@ -210,7 +208,6 @@ def make_map(
             "<extra></extra>"
         )
 
-    # build figure
     fig = px.choropleth_mapbox(
         gdf,
         geojson=geojson,
@@ -235,7 +232,7 @@ def make_map(
             center={"lat": 53.7, "lon": -1.5},
         ),
         dragmode="zoom",
-        clickmode="event",
+        clickmode="event+select",
         uirevision="keep",
         title={
             "text": f"{dataset.upper()} – {_pretty_domain(domain)} ({geography.upper()})",
@@ -252,7 +249,5 @@ def make_map(
 
     return fig
 
-
-# highlight outline (placeholder to extend later)
 def add_highlight_outline(fig, gdf, geojson, feature_id: str):
     return fig
