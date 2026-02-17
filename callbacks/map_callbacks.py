@@ -22,7 +22,6 @@ from utils.constants import (
 
 
 # helpers
-
 def _to_int_list(v):
     if v is None or v == '' or v == 'All':
         return []
@@ -151,6 +150,7 @@ def drilldown_lad_to_lsoa(click_single, click_left, click_right, geography, view
     raise PreventUpdate
 
 
+# domain opts
 @app.callback(
     Output('domain_selector', 'options'),
     Output('domain_selector', 'value'),
@@ -170,6 +170,7 @@ def update_domain_options(view, geo, dataset, current_domain):
     return opts, current_domain
 
 
+# single map
 @app.callback(
     Output('map_single', 'figure'),
     Input('geography_selector', 'value'),
@@ -227,6 +228,7 @@ def update_map(
     return fig
 
 
+# compare maps
 @app.callback(
     Output('map_compare_left', 'figure'),
     Output('map_compare_right', 'figure'),
@@ -254,7 +256,6 @@ def update_compare_maps(
         filtered_lsoa_left = _filter_lsoa_by_deciles(lsoa_base, 'ppfi', domain_ppfi, lsoa_decile)
         filtered_lsoa_right = _filter_lsoa_by_deciles(lsoa_base, 'imd', domain_imd, lsoa_decile)
 
-        # APPLY SAME LAD FILTER TO BOTH MAPS
         filtered_lsoa_left = _filter_lsoa_to_selected_lad(filtered_lsoa_left, selected_lad)
         filtered_lsoa_right = _filter_lsoa_to_selected_lad(filtered_lsoa_right, selected_lad)
 
@@ -276,6 +277,7 @@ def update_compare_maps(
         geojson_lsoa,
         filtered_lad_left,
         geojson_lad,
+        compact_hover=True,
     )
 
     right_fig = make_map(
@@ -286,6 +288,7 @@ def update_compare_maps(
         geojson_lsoa,
         filtered_lad_right,
         geojson_lad,
+        compact_hover=True,
     )
 
     if geography == 'lsoa' and selected_lad:
@@ -298,5 +301,34 @@ def update_compare_maps(
                 right_fig.update_layout(mapbox_center=center, mapbox_zoom=zoom)
             except Exception:
                 pass
+
+    pretty_ppfi = domain_ppfi.replace("_"," ").title()
+    pretty_imd  = domain_imd.replace("_"," ").title()
+    geo_label   = geography.upper()
+
+    if not selected_lad:
+        left_fig.update_layout(
+            title={"text": f"PPFI – {pretty_ppfi} ({geo_label})", "x": 0.5}
+        )
+        right_fig.update_layout(
+            title={"text": f"IMD – {pretty_imd} ({geo_label})", "x": 0.5}
+        )
+        return left_fig, right_fig
+
+    lad_label = selected_lad.get("lad_name") or selected_lad.get("lad_id")
+
+    left_fig.update_layout(
+        title={
+            "text": f"PPFI – {pretty_ppfi} ({geo_label}) within {lad_label}",
+            "x": 0.5
+        }
+    )
+
+    right_fig.update_layout(
+        title={
+            "text": f"IMD – {pretty_imd} ({geo_label}) within {lad_label}",
+            "x": 0.5
+        }
+    )
 
     return left_fig, right_fig
