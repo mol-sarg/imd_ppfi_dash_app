@@ -235,7 +235,7 @@ def make_map(
             center={"lat": 53.7, "lon": -1.5},
         ),
         dragmode="zoom",
-        clickmode="event+select",
+        clickmode="event",
         uirevision="keep",
         title={
             "text": f"{dataset.upper()} – {_pretty_domain(domain)} ({geography.upper()})",
