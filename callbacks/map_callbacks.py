@@ -20,12 +20,10 @@ from utils.constants import (
     IMD_DOMAINS_LSOA,
 )
 
-
 # helpers
 def _to_int_list(v):
     if v is None or v == '' or v == 'All':
         return []
-
     if isinstance(v, (list, tuple, set)):
         out = []
         for item in v:
@@ -34,7 +32,6 @@ def _to_int_list(v):
             except Exception:
                 pass
         return out
-
     try:
         return [int(v)]
     except Exception:
@@ -45,26 +42,21 @@ def _filter_lsoa_by_deciles(gdf, dataset: str, domain: str, deciles_value):
     deciles = _to_int_list(deciles_value)
     if not deciles:
         return gdf
-
     col = (PPFI_DOMAINS_LSOA[domain] if dataset == 'ppfi' else IMD_DOMAINS_LSOA[domain])
     if col not in gdf.columns:
         return gdf
-
     return gdf[gdf[col].isin(deciles)]
 
 
 def _filter_lad_by_percent(gdf, dataset: str, domain: str, lad_percent):
     if lad_percent is None:
         return gdf
-
     rank_col = (PPFI_DOMAINS_LAD[domain] if dataset == 'ppfi' else IMD_DOMAINS_LAD[domain])
     if rank_col not in gdf.columns:
         return gdf
-
     max_rank_val = gdf[rank_col].max()
     if max_rank_val is None:
         return gdf
-
     max_rank = int((lad_percent / 100) * max_rank_val)
     return gdf[gdf[rank_col] <= max_rank]
 
@@ -72,14 +64,11 @@ def _filter_lad_by_percent(gdf, dataset: str, domain: str, lad_percent):
 def _filter_lsoa_to_selected_lad(gdf, selected_lad):
     if not selected_lad or not isinstance(selected_lad, dict):
         return gdf
-
     lad_id = selected_lad.get('lad_id')
     if not lad_id:
         return gdf
-
     if 'lad_cd' not in gdf.columns:
         return gdf
-
     return gdf[gdf['lad_cd'] == lad_id]
 
 
@@ -87,12 +76,10 @@ def _center_zoom_from_bounds(bounds):
     minx, miny, maxx, maxy = bounds
     center = {'lon': (minx + maxx) / 2, 'lat': (miny + maxy) / 2}
     span = max(maxx - minx, maxy - miny)
-
     if span <= 0:
         zoom = 9.5
     else:
         zoom = 8.5 - math.log(span + 1e-9, 2)
-
     zoom = max(5.3, min(10.5, zoom))
     return center, zoom
 
@@ -102,14 +89,14 @@ def _extract_lad_from_click(clickData):
         return None, None
     pt = clickData['points'][0]
     lad_id = pt.get('location') or pt.get('id')
-
     lad_name = None
     cd = pt.get('customdata')
     if isinstance(cd, (list, tuple)) and len(cd) > 0:
         lad_name = cd[0]
-
     return lad_id, lad_name
 
+
+# drilldown
 @app.callback(
     Output('selected_lad_store', 'data'),
     Output('geography_selector', 'value'),
@@ -121,7 +108,6 @@ def _extract_lad_from_click(clickData):
     prevent_initial_call=True,
 )
 def drilldown_lad_to_lsoa(click_single, click_left, click_right, geography, view):
-
     triggered = (
         dash.callback_context.triggered[0]['prop_id'].split('.')[0]
         if dash.callback_context.triggered
@@ -161,12 +147,9 @@ def drilldown_lad_to_lsoa(click_single, click_left, click_right, geography, view
 )
 def update_domain_options(view, geo, dataset, current_domain):
     domains = get_domains_for_compare(geo) if view == 'compare' else get_domains_for_single(geo, dataset)
-
     opts = [{'label': k.replace('_', ' ').title(), 'value': k} for k in domains.keys()]
-
     if current_domain not in domains:
         current_domain = 'combined'
-
     return opts, current_domain
 
 
@@ -181,15 +164,7 @@ def update_domain_options(view, geo, dataset, current_domain):
     Input('lad_rank_filter', 'value'),
     Input('selected_lad_store', 'data'),
 )
-def update_map(
-    geography,
-    dataset,
-    domain,
-    view,
-    lsoa_decile,
-    lad_percent,
-    selected_lad,
-):
+def update_map(geography, dataset, domain, view, lsoa_decile, lad_percent, selected_lad):
     filtered_lsoa = gdf_lsoa.copy()
     filtered_lad = gdf_lad.copy()
 
@@ -208,9 +183,9 @@ def update_map(
         geojson_lsoa,
         filtered_lad,
         geojson_lad,
+        selected_lad=selected_lad,  
     )
 
-    # zoom/center to selected LAD's LSOAs
     if geography == 'lsoa' and selected_lad and hasattr(filtered_lsoa, 'empty') and not filtered_lsoa.empty:
         try:
             minx, miny, maxx, maxy = filtered_lsoa.total_bounds
@@ -240,15 +215,7 @@ def update_map(
     Input('view_selector', 'value'),
     Input('selected_lad_store', 'data'),
 )
-def update_compare_maps(
-    geography,
-    domain_ppfi,
-    domain_imd,
-    lsoa_decile,
-    lad_percent,
-    view,
-    selected_lad,
-):
+def update_compare_maps(geography, domain_ppfi, domain_imd, lsoa_decile, lad_percent, view, selected_lad):
     lsoa_base = gdf_lsoa.copy()
     lad_base = gdf_lad.copy()
 
@@ -261,7 +228,6 @@ def update_compare_maps(
 
         filtered_lad_left = lad_base
         filtered_lad_right = lad_base
-
     else:
         filtered_lsoa_left = lsoa_base
         filtered_lsoa_right = lsoa_base
@@ -278,6 +244,7 @@ def update_compare_maps(
         filtered_lad_left,
         geojson_lad,
         compact_hover=True,
+        selected_lad=selected_lad,  
     )
 
     right_fig = make_map(
@@ -289,6 +256,7 @@ def update_compare_maps(
         filtered_lad_right,
         geojson_lad,
         compact_hover=True,
+        selected_lad=selected_lad, 
     )
 
     if geography == 'lsoa' and selected_lad:
@@ -307,28 +275,11 @@ def update_compare_maps(
     geo_label   = geography.upper()
 
     if not selected_lad:
-        left_fig.update_layout(
-            title={"text": f"PPFI – {pretty_ppfi} ({geo_label})", "x": 0.5}
-        )
-        right_fig.update_layout(
-            title={"text": f"IMD – {pretty_imd} ({geo_label})", "x": 0.5}
-        )
+        left_fig.update_layout(title={"text": f"PPFI – {pretty_ppfi} ({geo_label})", "x": 0.5})
+        right_fig.update_layout(title={"text": f"IMD – {pretty_imd} ({geo_label})", "x": 0.5})
         return left_fig, right_fig
 
     lad_label = selected_lad.get("lad_name") or selected_lad.get("lad_id")
-
-    left_fig.update_layout(
-        title={
-            "text": f"PPFI – {pretty_ppfi} ({geo_label}) within {lad_label}",
-            "x": 0.5
-        }
-    )
-
-    right_fig.update_layout(
-        title={
-            "text": f"IMD – {pretty_imd} ({geo_label}) within {lad_label}",
-            "x": 0.5
-        }
-    )
-
+    left_fig.update_layout(title={"text": f"PPFI – {pretty_ppfi} ({geo_label}) within {lad_label}", "x": 0.5})
+    right_fig.update_layout(title={"text": f"IMD – {pretty_imd} ({geo_label}) within {lad_label}", "x": 0.5})
     return left_fig, right_fig
