@@ -1,4 +1,4 @@
-FROM python:3.11-slim # update to python 3.11
+FROM python:3.11-slim 
 
 # needed for fiona/geopandas
 RUN apt-get update && apt-get install -y --no-install-recommends \
