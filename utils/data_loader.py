@@ -59,4 +59,22 @@ def load_all_data():
     df_mismatch['abs_diff'] = df_mismatch['ppfi_imd_diff'].abs()
     df_mismatch.sort_values('abs_diff', ascending=False, inplace=True)
 
+    # join ward names
+    try:
+        ward_lookup = pd.read_csv('data/lsoa21_ward_lookup.csv')
+        ward_col = next((c for c in ward_lookup.columns if 'LSOA' in c.upper()), None)
+        name_col = next((c for c in ward_lookup.columns if 'WD' in c.upper() and 'NM' in c.upper()), None)
+        if ward_col and name_col:
+            ward_lookup = (
+                ward_lookup[[ward_col, name_col]]
+                .rename(columns={ward_col: '_lsoa_key', name_col: 'ward_name'})
+            )
+            ward_lookup['_lsoa_key'] = ward_lookup['_lsoa_key'].astype(str).str.strip().str.upper()
+            ward_lookup = ward_lookup.drop_duplicates('_lsoa_key')
+            df_mismatch = df_mismatch.merge(
+                ward_lookup, left_on='lsoa21cd', right_on='_lsoa_key', how='left'
+            ).drop(columns=['_lsoa_key'])
+    except FileNotFoundError:
+        df_mismatch['ward_name'] = ''
+
     return gdf_lsoa, geojson_lsoa, gdf_lad, geojson_lad, df_mismatch

@@ -84,3 +84,24 @@ IMD_DOMAINS_LAD = {
     'barriers': 'barriers_rank',
     'living environment': 'living_env_rank',
 }
+
+# Human-readable domain label lists — each entry is (df_column, display_label)
+PPFI_LSOA_DOMAIN_LABELS = [
+    ("pp_dec_domain_supermarket_proximity",    "Proximity to supermarket retail facilities"),
+    ("pp_dec_domain_supermarket_accessibility","Accessibility to supermarket retail facilities"),
+    ("pp_dec_domain_ecommerce_access",         "Access to online deliveries"),
+    ("pp_dec_domain_socio_demographic",        "Socio-demographic"),
+    ("pp_dec_domain_nonsupermarket_proximity", "Proximity to non-supermarket food provision"),
+    ("pp_dec_domain_food_for_families",        "Need for family food support"),
+    ("pp_dec_domain_fuel_poverty",             "Fuel poverty"),
+]
+
+IMD_LSOA_DOMAIN_LABELS = [
+    ("imd_income_decile",     "Income"),
+    ("imd_employment_decile", "Employment"),
+    ("imd_education_decile",  "Education"),
+    ("imd_health_decile",     "Health"),
+    ("imd_crime_decile",      "Crime"),
+    ("imd_barriers_decile",   "Barriers to housing & services"),
+    ("imd_living_env_decile", "Living environment"),
+]

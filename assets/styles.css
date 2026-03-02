@@ -222,3 +222,33 @@ a:hover {
   background: rgba(124, 198, 254, 0.2);
   color: var(--brand-navy);
 }
+
+/* domain divergence bar charts */
+.domain-bars-row {
+  display: flex;
+  gap: 16px;
+  margin-top: 12px;
+}
+
+.domain-bar-col {
+  flex: 1;
+  min-width: 0;
+}
+
+/* about panel info cards */
+.info-card {
+  border-radius: 8px;
+  padding: 14px 18px;
+  margin-bottom: 12px;
+  border-left: 4px solid;
+}
+
+.info-card--imd {
+  background: #f0faf0;
+  border-left-color: #27ae60;
+}
+
+.info-card--ppfi {
+  background: #eef4ff;
+  border-left-color: #2255aa;
+}
