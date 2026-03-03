@@ -10,6 +10,8 @@ from utils.constants import (
     PPFI_LSOA_PALETTE, IMD_LSOA_PALETTE,
     PPFI_LAD_PALETTE,  IMD_LAD_PALETTE,
     LSOA_NAME, LAD_NAME,
+    PPFI_LSOA_DOMAIN_LABELS,
+    IMD_LSOA_DOMAIN_LABELS,
 )
 
 from utils.data import gdf_lsoa_full, gdf_lad_full
@@ -61,6 +63,148 @@ def _safe(gdf, col):
     return gdf[col] if col and col in gdf.columns else None
 
 
+def _join_labels(labels):
+    if len(labels) == 1: return f"'{labels[0]}'"
+    if len(labels) == 2: return f"'{labels[0]}' and '{labels[1]}'"
+    return ', '.join(f"'{l}'" for l in labels[:-1]) + f" and '{labels[-1]}'"
+
+
+def _hover_narrative(row, geography: str, n_lad: int = 0) -> str:
+    """Plain-text divergence/alignment narrative for single-map hover tooltips.
+    Returns <br>-joined sentences for Plotly rendering.
+    LSOA: decile scale (1 = most deprived / highest priority, 10 = least).
+    LAD:  rank scale  (1 = most deprived / highest priority, higher = less)."""
+    try:
+        diff     = float(row.get('diff') or 0)
+        ppfi_val = row.get('ppfi_combined')
+        imd_val  = row.get('imd_combined')
+    except (TypeError, ValueError):
+        return ''
+    if ppfi_val is None or imd_val is None:
+        return ''
+
+    ppfi_int = int(ppfi_val)
+    imd_int  = int(imd_val)
+    abs_diff = abs(diff)
+    lines    = []
+
+    if geography == 'lsoa':
+        # ── LSOA: decile thresholds (1–10) ────────────────────────────────────
+        # diff = ppfi_decile − imd_decile
+        # diff > 0 → ppfi_decile larger (lower food priority) + imd_decile smaller (more deprived)
+        #           → IMD shows greater deprivation than PPFI shows food priority
+        # diff < 0 → ppfi_decile smaller (higher food priority) + imd_decile larger (less deprived)
+        #           → PPFI shows greater food vulnerability than IMD shows deprivation
+        if diff > 3:
+            lines.append(
+                f'IMD decile {imd_int} (1 = most deprived) indicates significantly greater '
+                f'deprivation than PPFI decile {ppfi_int} (1 = highest priority) indicates '
+                'food vulnerability for this area.'
+            )
+            ppfi_vals = {col: row[col] for col, _ in PPFI_LSOA_DOMAIN_LABELS if row.get(col) is not None}
+            if ppfi_vals:
+                best2  = sorted(ppfi_vals.items(), key=lambda x: -x[1])[:2]
+                labels = [lbl for col, lbl in PPFI_LSOA_DOMAIN_LABELS if col in dict(best2)]
+                if labels:
+                    lines.append(
+                        f'Relatively better PPFI performance on {_join_labels(labels)} '
+                        'may be cushioning the overall PPFI food priority score.'
+                    )
+            imd_vals = {col: row[col] for col, _ in IMD_LSOA_DOMAIN_LABELS if row.get(col) is not None}
+            if imd_vals:
+                worst = [lbl for col, lbl in IMD_LSOA_DOMAIN_LABELS
+                         if imd_vals.get(col) is not None and imd_vals[col] <= 3]
+                if not worst:
+                    top2  = sorted(imd_vals.items(), key=lambda x: x[1])[:2]
+                    worst = [lbl for col, lbl in IMD_LSOA_DOMAIN_LABELS if col in dict(top2)]
+                if worst:
+                    lines.append(
+                        f'IMD score driven primarily by {_join_labels(worst)}, '
+                        'which are distinct from food access indicators.'
+                    )
+
+        elif diff < -3:
+            lines.append(
+                f'PPFI decile {ppfi_int} (1 = highest priority) indicates significantly '
+                f'greater food vulnerability than IMD decile {imd_int} (1 = most deprived) '
+                'indicates general deprivation for this area.'
+            )
+            ppfi_vals = {col: row[col] for col, _ in PPFI_LSOA_DOMAIN_LABELS if row.get(col) is not None}
+            if ppfi_vals:
+                worst = [lbl for col, lbl in PPFI_LSOA_DOMAIN_LABELS
+                         if ppfi_vals.get(col) is not None and ppfi_vals[col] <= 3]
+                if not worst:
+                    top2  = sorted(ppfi_vals.items(), key=lambda x: x[1])[:2]
+                    worst = [lbl for col, lbl in PPFI_LSOA_DOMAIN_LABELS if col in dict(top2)]
+                if worst:
+                    lines.append(
+                        f'PPFI score particularly driven by {_join_labels(worst)}, '
+                        'reflecting food access challenges not captured by IMD.'
+                    )
+
+        elif abs_diff <= 1:
+            lines.append(
+                f'IMD decile {imd_int} and PPFI decile {ppfi_int} closely agree for this area '
+                '(decile 1 = most deprived / highest priority). Both indices tell a consistent story.'
+            )
+
+        else:
+            if diff > 0:
+                lines.append(
+                    f'IMD decile {imd_int} (1 = most deprived) indicates more deprivation than '
+                    f'PPFI decile {ppfi_int} (1 = highest priority) indicates food vulnerability '
+                    f'({abs_diff:.0f} decile gap).'
+                )
+            else:
+                lines.append(
+                    f'PPFI decile {ppfi_int} (1 = highest priority) indicates greater food '
+                    f'vulnerability than IMD decile {imd_int} (1 = most deprived) indicates '
+                    f'general deprivation ({abs_diff:.0f} decile gap).'
+                )
+
+    else:
+        # ── LAD: rank scale ────────────────────────────────────────────────────
+        # diff = ppfi_rank − imd_rank
+        # diff > 0 → ppfi_rank larger (lower food priority) + imd_rank smaller (more deprived)
+        #           → IMD ranks area as more deprived than PPFI ranks it as a food priority
+        # diff < 0 → ppfi_rank smaller (higher food priority) + imd_rank larger (less deprived)
+        #           → PPFI ranks area as higher food priority than IMD ranks it as deprived
+        slight_thr   = max(1, int(round(0.10 * n_lad))) if n_lad else 10
+        moderate_thr = max(slight_thr + 1, int(round(0.25 * n_lad))) if n_lad else 25
+
+        if diff > moderate_thr:
+            lines.append(
+                f'IMD rank {imd_int} (1 = most deprived) indicates significantly greater '
+                f'deprivation than PPFI rank {ppfi_int} (1 = highest priority) indicates '
+                'food vulnerability for this local authority.'
+            )
+        elif diff < -moderate_thr:
+            lines.append(
+                f'PPFI rank {ppfi_int} (1 = highest priority) indicates significantly greater '
+                f'food vulnerability than IMD rank {imd_int} (1 = most deprived) indicates '
+                'general deprivation for this local authority.'
+            )
+        elif abs_diff <= slight_thr:
+            lines.append(
+                f'IMD rank {imd_int} and PPFI rank {ppfi_int} closely agree for this local authority '
+                '(rank 1 = most deprived / highest priority).'
+            )
+        else:
+            if diff > 0:
+                lines.append(
+                    f'IMD rank {imd_int} (1 = most deprived) indicates more deprivation than '
+                    f'PPFI rank {ppfi_int} (1 = highest priority) indicates food vulnerability.'
+                )
+            else:
+                lines.append(
+                    f'PPFI rank {ppfi_int} (1 = highest priority) indicates greater food '
+                    f'vulnerability than IMD rank {imd_int} (1 = most deprived) indicates '
+                    'general deprivation.'
+                )
+
+    return '<br>'.join(lines)
+
+
 def _alignment_band(mismatch_value, geography: str, n_lad: int):
     if mismatch_value is None:
         return ""
@@ -71,11 +215,11 @@ def _alignment_band(mismatch_value, geography: str, n_lad: int):
         return ""
 
     if m > 0:
-        direction = "Food-related vulnerability is higher than general deprivation in this area."
+        direction = "General deprivation (IMD) is higher than food-related vulnerability (PPFI) for this area."
     elif m < 0:
-        direction = "General deprivation is higher than food-related vulnerability in this area."
+        direction = "Food-related vulnerability (PPFI) is higher than general deprivation (IMD) for this area."
     else:
-        return "Alignment: Closely aligned"
+        return "Alignment: Both indices closely agree for this area."
 
     a = abs(m)
 
@@ -225,31 +369,31 @@ def make_map(
         else:
             gdf["diff"] = None
 
-        gdf["align"] = gdf["diff"].apply(
-            lambda v: _alignment_band(v, geography, len(gdf_lad_full))
-        )
-
         if domain != "combined" and color_col in gdf.columns:
             gdf["domain_line"] = f"{pretty} {metric} ({dataset.upper()}): " + gdf[color_col].astype(str)
         else:
             gdf["domain_line"] = ""
+
+        gdf["narrative"] = gdf.apply(
+            lambda r: _hover_narrative(r.to_dict(), geography, len(gdf_lad_full)), axis=1
+        )
 
         customdata = gdf[[
             "name",          # 0
             "ppfi_combined", # 1
             "imd_combined",  # 2
             "diff",          # 3
-            "align",         # 4
-            "domain_line",   # 5
+            "domain_line",   # 4
+            "narrative",     # 5
         ]].values
 
         hovertemplate = (
             "<b>%{customdata[0]}</b><br>"
             "PPFI combined: %{customdata[1]}<br>"
             "IMD combined: %{customdata[2]}<br>"
-            "Difference (PPFI − IMD): %{customdata[3]}<br>"
+            "Difference (PPFI \u2212 IMD): %{customdata[3]}<br>"
             "%{customdata[4]}<br>"
-            "%{customdata[5]}<br><br>"
+            "%{customdata[5]}<br>"
             "<extra></extra>"
         )
 
