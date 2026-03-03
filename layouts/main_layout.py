@@ -78,7 +78,6 @@ layout = html.Div(
                             options=[
                                 {"label": " Map", "value": "map"},
                                 {"label": " Side-by-side", "value": "compare"},
-                                {"label": " Summary statistics", "value": "stats"},
                                 {"label": " Mismatch explorer", "value": "mismatch"},
                                 {"label": " About", "value": "about"},
                             ],
@@ -320,17 +319,6 @@ layout = html.Div(
                     ],
                 ),
 
-                # stats
-                html.Div(
-                    id="stats_panel",
-                    className="panel-card",
-                    style={"display": "none", "marginTop": "10px"},
-                    children=[
-                        html.H3("Summary statistics"),
-                        html.Div(id="stats_content"),
-                    ],
-                ),
-
                 # mismatch
                 html.Div(
                     id="mismatch_panel",
@@ -505,3 +493,4 @@ layout = html.Div(
         ),
     ],
 )
+
