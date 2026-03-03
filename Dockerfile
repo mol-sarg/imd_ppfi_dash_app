@@ -13,4 +13,5 @@ ADD requirements.txt /app/
 RUN pip install --upgrade pip setuptools wheel \
  && pip install -r requirements.txt
 ADD . /app/
-CMD [ "gunicorn", "--workers=5", "--threads=1", "--timeout=600", "-b 0.0.0.0:8000", "app:server" ]
+# added preload to save ram on azure
+CMD ["gunicorn", "--workers=1", "--threads=4", "--preload", "--timeout=600", "--bind", "0.0.0.0:8000", "app:server"]
