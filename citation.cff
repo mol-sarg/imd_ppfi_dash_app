@@ -1,0 +1,13 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "IMD-PPFI Explorer"
+version: 1.0.0
+date-released: 2026
+url: "https://github.com/mol-sarg/imd_ppfi_dash_app"
+repository-code: "https://github.com/mol-sarg/imd_ppfi_dash_app"
+authors:
+  - family-names: "Sargent"
+    given-names: "Molly"
+abstract: >
+  A Dash-based application for visualising and analysing Index of Multiple Deprivation and Priority Places for Food Index data,
+  providing interactive tools and insights for research and reporting.
