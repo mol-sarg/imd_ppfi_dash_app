@@ -484,7 +484,7 @@ layout = html.Div(
                             "By making these differences easier to see, this tool helps ensure that food-related need "
                             "is clearer and less likely to be overlooked."
                         ),
-                        html.P(html.I("Data sources: PPFI V2.1 (The Food Foundation) \u00b7 English IMD 2025 (MHCLG) \u00b7 "
+                        html.P(html.I("Data sources: PPFI V2.1 (Pontin et al. 2024) \u00b7 English IMD 2025 (MHCLG) \u00b7 "
                                       "LSOA 2021 and LAD 2024 boundaries (ONS)."),
                                style={"fontSize": "12px", "color": "#888", "marginTop": "24px"}),
                     ],
@@ -493,5 +493,6 @@ layout = html.Div(
         ),
     ],
 )
+
 
 
