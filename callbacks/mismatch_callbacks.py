@@ -160,7 +160,7 @@ def _narrative(lsoa_name, ppfi_dec, imd_dec, diff, domain_row):
 
     paras.append(html.P(html.I(
         'Decile 1 = most deprived / highest priority. '
-        'Domain scores are from PPFI V2.1 and English IMD 2019.'
+        'Domain scores are from PPFI V2.1 and English IMD 2025.'
     )))
     return html.Div(paras, style={
         'background': '#f4f7ff', 'border': '1px solid #ccd6f0',
@@ -285,3 +285,4 @@ def update_domain_divergence(lsoa_code):
     fig_imd  = _make_domain_bar(IMD_DOMAIN_COLS,  imd_vals,  imd_dec,  'IMD composite decile')
 
     return {'display': 'block'}, title, narrative, fig_ppfi, fig_imd
+
