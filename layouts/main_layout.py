@@ -317,8 +317,6 @@ layout = html.Div(
                     id="mismatch_panel",
                     style={"display": "none",
                            "marginTop": "10px",
-                           "flex": 1,
-                           "minHeight":0,
                            "overflowY":"auto",
                            "padding":"16px",
                            "boxSizing":"border-box",
@@ -419,8 +417,6 @@ layout = html.Div(
                     id="about_panel",
                     style={"display": "block", 
                            "marginTop": "10px",
-                           "flex":1, 
-                           "minHeight":0, 
                            "overflowY":"auto",
                            "padding":"16px",
                            "boxSizing":"border-box",
@@ -498,6 +494,7 @@ layout = html.Div(
         ),
     ],
 )
+
 
 
 
