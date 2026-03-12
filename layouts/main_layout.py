@@ -315,7 +315,6 @@ layout = html.Div(
                 # mismatch
                 html.Div(
                     id="mismatch_panel",
-                    className="panel-card",
                     style={"display": "none",
                            "marginTop": "10px",
                            "flex": 1,
@@ -418,7 +417,6 @@ layout = html.Div(
                 #about
                 html.Div(
                     id="about_panel",
-                    className="panel-card",
                     style={"display": "block", 
                            "marginTop": "10px",
                            "flex":1, 
@@ -500,6 +498,7 @@ layout = html.Div(
         ),
     ],
 )
+
 
 
 
