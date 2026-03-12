@@ -20,10 +20,11 @@ from app import app
     Input("geography_selector", "value"),
 )
 def switch_view(view, geo):
+
     show = {"display": "block"}
     hide = {"display": "none"}
 
-    # main-view containers should fill the main area
+    # full-height views
     show_map = {
         "display": "flex",
         "flexDirection": "column",
@@ -31,6 +32,7 @@ def switch_view(view, geo):
         "minHeight": 0,
         "minWidth": 0,
     }
+
     show_compare = {
         "display": "flex",
         "flexDirection": "column",
@@ -39,14 +41,22 @@ def switch_view(view, geo):
         "minWidth": 0,
         "gap": "10px",
     }
-    show_panel = {"display": "block", "height": "100%", "overflow": "auto"}
+
+    # normal page views (About + Mismatch)
+    show_page = {
+        "display": "block",
+        "marginTop": "10px",
+        "padding": "16px",
+        "boxSizing": "border-box",
+        "overflowY": "auto",
+    }
 
     # geography controls visible for map + compare only
     geography_style = show if view in ["map", "compare"] else hide
 
-    # these two filters only relevant for map + compare
     lsoa_filter = show if geo == "lsoa" and view in ["map", "compare"] else hide
     lad_filter = show if geo == "lad" and view in ["map", "compare"] else hide
+
 
     if view == "map":
         return (
@@ -56,6 +66,7 @@ def switch_view(view, geo):
             lsoa_filter, lad_filter
         )
 
+
     if view == "compare":
         return (
             hide, show_compare, hide, hide,
@@ -64,18 +75,20 @@ def switch_view(view, geo):
             lsoa_filter, lad_filter
         )
 
+
     if view == "mismatch":
         return (
-            hide, hide, show_panel, hide,
-            hide,        
+            hide, hide, show_page, hide,
+            hide,
             hide, hide, hide,
             hide, hide
         )
 
-    # about (default)
+
+    # about
     return (
-        hide, hide, hide, show_panel,
-        hide,        
+        hide, hide, hide, show_page,
+        hide,
         hide, hide, hide,
         hide, hide
     )
