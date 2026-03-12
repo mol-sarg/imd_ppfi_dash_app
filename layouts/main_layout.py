@@ -76,10 +76,10 @@ layout = html.Div(
                             id="view_selector",
                             className="nav-radio",
                             options=[
+                                {"label": " About", "value": "about"},
                                 {"label": " Map", "value": "map"},
                                 {"label": " Side-by-side", "value": "compare"},
                                 {"label": " Mismatch explorer", "value": "mismatch"},
-                                {"label": " About", "value": "about"},
                             ],
                             value="about",
                         ),
@@ -202,7 +202,7 @@ layout = html.Div(
                 "display": "flex",
                 "flexDirection": "column",
                 "minHeight": 0,
-
+                "overflow":"hidden",
                 "background": "#ffffff",
                 "boxSizing": "border-box",
             },
@@ -272,7 +272,7 @@ layout = html.Div(
                                         "minWidth": 0,
                                     },
                                     children=[
-                                        html.H4("PPFI", style={"margin": "0 0 6px 0"}),
+                                        html.H4("Priority Places for Food Index", style={"margin": "0 0 6px 0"}),
                                         dcc.Graph(
                                             id="map_compare_left",
                                             style={
@@ -294,7 +294,7 @@ layout = html.Div(
                                         "minWidth": 0,
                                     },
                                     children=[
-                                        html.H4("IMD", style={"margin": "0 0 6px 0"}),
+                                        html.H4("Index of Multiple Deprivation", style={"margin": "0 0 6px 0"}),
                                         dcc.Graph(
                                             id="map_compare_right",
                                             style={
@@ -316,7 +316,14 @@ layout = html.Div(
                 html.Div(
                     id="mismatch_panel",
                     className="panel-card",
-                    style={"display": "none", "marginTop": "10px"},
+                    style={"display": "none",
+                           "marginTop": "10px",
+                           "flex": 1,
+                           "minHeight":0,
+                           "overflowY":"auto",
+                           "padding":"16px",
+                           "boxSizing":"border-box",
+                          },
                     children=[
                         html.H3("Mismatch explorer"),
                         # --- filters row ---
@@ -412,7 +419,14 @@ layout = html.Div(
                 html.Div(
                     id="about_panel",
                     className="panel-card",
-                    style={"display": "block", "marginTop": "10px"},
+                    style={"display": "block", 
+                           "marginTop": "10px",
+                           "flex":1, 
+                           "minHeight":0, 
+                           "overflowY":"auto",
+                           "padding":"16px",
+                           "boxSizing":"border-box",
+                          },                    
                     children=[
                         html.H2(
                             "A tool to compare the Index of Multiple Deprivation & Priority Places for Food Index",
@@ -486,6 +500,7 @@ layout = html.Div(
         ),
     ],
 )
+
 
 
 
