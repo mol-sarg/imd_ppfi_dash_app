@@ -10,6 +10,7 @@ import callbacks.navigation_callbacks
 import callbacks.map_callbacks
 import callbacks.mismatch_callbacks
 import callbacks.compare_domain_callbacks
+import callbacks.mismatch_map_callbacks
 
 # set layout on import
 app.layout = layout

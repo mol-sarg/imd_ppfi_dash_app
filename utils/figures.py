@@ -437,5 +437,17 @@ def make_map(
     return fig
 
 
+def make_mismatch_map(
+        filtered_lsoa,
+        geojson_lsoa,
+):
+    fig = px.choropleth_map(
+        data_frame=filtered_lsoa,
+        geojson=geojson_lsoa,
+        opacity=0.85,
+    )
+        
+    return fig
+
 def add_highlight_outline(fig, gdf, geojson, feature_id: str):
     return fig

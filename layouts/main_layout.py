@@ -80,6 +80,7 @@ layout = html.Div(
                                 {"label": " Map", "value": "map"},
                                 {"label": " Side-by-side", "value": "compare"},
                                 {"label": " Mismatch explorer", "value": "mismatch"},
+                                {"label": " Mismatch map", "value": "mismatch_map"},
                             ],
                             value="about",
                         ),
@@ -168,6 +169,25 @@ layout = html.Div(
                             step=5,
                             value=100,
                             marks={p: f"{p}%" for p in range(0, 101, 20)},
+                        ),
+                    ],
+                ),
+
+                
+                # mismatch threshold filter
+                html.Div(
+                    id="mismatch_threshold_block",
+                    className="sidebar-section",
+                    style={"display": "none"},
+                    children=[
+                        html.Div("Mismatch threshold (abs diff ≥)", className="sidebar-label"),
+                        dcc.Slider(
+                            id="mismatch_threshold_slider",
+                            min=0,
+                            max=9,
+                            step=0.5,
+                            value=0,
+                            marks={i: str(i) for i in range(10)},
                         ),
                     ],
                 ),
@@ -490,6 +510,29 @@ layout = html.Div(
                                style={"fontSize": "12px", "color": "#888", "marginTop": "24px"}),
                     ],
                 ),
+                
+                # mismatch map
+                html.Div(
+                    id="mismatch_map_panel",
+                    className="panel-card",
+                    style={
+                        "display": "none",
+                        "flex": 1,
+                        "flexDirection": "column",
+                        "minHeight": 0,
+                        "boxSizing": "border-box",
+                        "padding": "16px",
+                    },
+                    children=[
+                        html.H3("Mismatch map", style={"margin": "0 0 8px 0"}),
+                        dcc.Graph(
+                            id="mismatch_map",
+                            style={"flex": 1, "height": "100%", "width": "100%", "minHeight": 0},
+                            config={"scrollZoom": True, "responsive": True},
+                        ),
+                    ],
+                ),
+
             ],
         ),
     ],

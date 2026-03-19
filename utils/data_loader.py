@@ -16,6 +16,10 @@ def load_all_data():
     gdf_lsoa = gdf_lsoa.set_crs(27700, allow_override=True).to_crs(4326)
     gdf_lad  = gdf_lad.set_crs(27700, allow_override=True).to_crs(4326)
 
+    # simplify geometries - 0.0001 ≈ ~10m, safe for LSOA; LAD can go coarser
+    gdf_lsoa.geometry = gdf_lsoa.geometry.simplify(tolerance=0.0001, preserve_topology=True)
+    gdf_lad.geometry  = gdf_lad.geometry.simplify(tolerance=0.0003, preserve_topology=True)
+
     # normalise keys (strip whitespace, force uppercase)
     gdf_lsoa = gdf_lsoa.copy()
     df_mismatch = df_mismatch.copy()
